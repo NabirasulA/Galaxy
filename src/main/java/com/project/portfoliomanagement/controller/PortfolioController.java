@@ -67,5 +67,31 @@ public class PortfolioController {
         portfolioService.sellStock(stockId, quantity);
         return ResponseEntity.noContent().build();
     }
-}
+
+    //get stock by symbol
+     //--------------------------------
+    @GetMapping("/stock/search")
+    public ResponseEntity<Stock> getStockBySymbol(@RequestParam String symbol) {
+        if((symbol==null)||symbol.isBlank()||symbol.isEmpty()){
+            throw new RuntimeException("Symbol Must be provided");
+        }
+        Stock stock = portfolioService.getStockBySymbol (symbol);
+        return ResponseEntity.ok(portfolioService.getStockBySymbol(symbol));
+    }
+
+    //Get todays gainers in stock market
+    @GetMapping("/stock/gainers")
+    public Object getTodaysGainers() {
+        return portfolioService.getMarketData().get("top_gainers");
+    }
+    //get todays losers in stock market
+    @GetMapping("/stock/losers")
+    public Object getTodaysLosers() {
+        return portfolioService.getMarketData().get("top_losers");
+    }
+    //get active stocks in stock market
+    @GetMapping("/stock/active")
+    public Object getActiveStocks() {
+        return portfolioService.getMarketData().get("most_active");
+    }
 }

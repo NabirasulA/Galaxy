@@ -3,14 +3,43 @@ package com.project.portfoliomanagement.service;
 import com.project.portfoliomanagement.entity.Stock;
 import com.project.portfoliomanagement.exception.ResourceNotFoundException;
 import com.project.portfoliomanagement.repository.StockRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class PortfolioService {
 
+    @Value("${alphavantage.api.key}")
+    private String apiKey;
+
+    @Value("${alphavantage.base.url}")
+    private String baseUrl;
+
+    private final RestTemplate restTemplate = new RestTemplate();
+
+    // cache for demo stability
+    private Map<String, Object> cachedResponse;
+
+    public Map<String, Object> getMarketData() {
+
+        if (cachedResponse != null) {
+            return cachedResponse;
+        }
+
+        String url = "https://www.alphavantage.co/query"+"?function=TOP_GAINERS_LOSERS"
+                + "&apikey=" + apiKey;
+
+        cachedResponse = restTemplate.getForObject(url, Map.class);
+        return cachedResponse;
+    }
+
     private final StockRepository stockRepository;
+
 
     public PortfolioService(StockRepository stockRepository) {
         this.stockRepository = stockRepository;
@@ -81,5 +110,14 @@ public class PortfolioService {
             );
         }
         stockRepository.deleteById(stockId);
+    }
+
+
+    //Search stock by symbol
+    public Stock getStockBySymbol(String symbol) {
+        return stockRepository.findBySymbol(symbol)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Stock not found with symbol: " + symbol
+                ));
     }
 }
