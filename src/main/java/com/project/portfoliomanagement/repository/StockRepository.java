@@ -4,9 +4,13 @@ import com.project.portfoliomanagement.entity.Stock;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface StockRepository extends JpaRepository<Stock, Long> {
     // No extra methods needed for now
+
+    Optional<Stock> findBySymbol(String symbol);
 }
 
 
