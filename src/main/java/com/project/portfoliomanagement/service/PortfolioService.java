@@ -36,15 +36,43 @@ public class PortfolioService {
     public Stock updateStockQuantity(Long stockId, Integer quantity) {
         Stock stock = stockRepository.findById(stockId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                "Stock not found with id: " + stockId
-        ));
+                        "Stock not found with id: " + stockId
+                ));
 
         stock.setQuantity(quantity);
         return stockRepository.save(stock);
     }
 
     // -----------------------------
-    // Remove stock from portfolio
+    // Sell stock (reduce quantity or delete if quantity becomes 0)
+    // -----------------------------
+    public void sellStock(Long stockId, Integer sellQuantity) {
+        Stock stock = stockRepository.findById(stockId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Stock not found with id: " + stockId
+                ));
+
+        if (sellQuantity <= 0) {
+            throw new IllegalArgumentException("Sell quantity must be positive");
+        }
+
+        if (stock.getQuantity() < sellQuantity) {
+            throw new IllegalArgumentException("Not enough stock to sell");
+        }
+
+        // Decrease quantity
+        stock.setQuantity(stock.getQuantity() - sellQuantity);
+
+        // If quantity becomes 0, delete the stock
+        if (stock.getQuantity() == 0) {
+            stockRepository.delete(stock);
+        } else {
+            stockRepository.save(stock);
+        }
+    }
+
+    // -----------------------------
+    // Remove stock from portfolio (only if quantity is 0)
     // -----------------------------
     public void removeStock(Long stockId) {
         if (!stockRepository.existsById(stockId)) {

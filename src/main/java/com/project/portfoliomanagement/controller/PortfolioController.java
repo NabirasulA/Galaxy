@@ -55,4 +55,17 @@ public class PortfolioController {
         portfolioService.removeStock(stockId);
         return ResponseEntity.noContent().build();
     }
+
+    // --------------------------------
+    // Sell stock (reduce quantity or delete if quantity becomes 0)
+    // --------------------------------
+    @PutMapping("/stock/{stockId}/sell")
+    public ResponseEntity<Void> sellStock(
+            @PathVariable Long stockId,
+            @RequestParam Integer quantity) {
+
+        portfolioService.sellStock(stockId, quantity);
+        return ResponseEntity.noContent().build();
+    }
+}
 }
