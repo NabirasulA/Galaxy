@@ -8,8 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface StockRepository extends JpaRepository<Stock, Long> {
-    // No extra methods needed for now
-
     Optional<Stock> findBySymbol(String symbol);
 }
 

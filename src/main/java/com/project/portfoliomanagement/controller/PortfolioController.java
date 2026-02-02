@@ -2,6 +2,7 @@ package com.project.portfoliomanagement.controller;
 
 import com.project.portfoliomanagement.entity.Stock;
 import com.project.portfoliomanagement.service.PortfolioService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,12 +28,12 @@ public class PortfolioController {
     }
 
     // --------------------------------
-    // Add stock to portfolio
+    // Add or Update stock to portfolio
     // --------------------------------
     @PostMapping("/stock")
-    public ResponseEntity<Stock> addStock(@RequestBody Stock stock) {
-        Stock savedStock = portfolioService.addStock(stock);
-        return new ResponseEntity<>(savedStock, HttpStatus.CREATED);
+    public ResponseEntity<Stock> addStock(@Valid @RequestBody Stock stock) {
+        Stock saved = portfolioService.addorUpdateStock(stock);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     // --------------------------------
@@ -67,6 +68,7 @@ public class PortfolioController {
         portfolioService.sellStock(stockId, quantity);
         return ResponseEntity.noContent().build();
     }
+
 
     //get stock by symbol
      //--------------------------------

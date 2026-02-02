@@ -5,9 +5,12 @@ import com.project.portfoliomanagement.exception.ResourceNotFoundException;
 import com.project.portfoliomanagement.repository.StockRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 
@@ -52,11 +55,46 @@ public class PortfolioService {
         return stockRepository.findAll();
     }
 
+
     // -----------------------------
-    // Add a new stock
+    // Add stock OR update existing stock with avg price recalculation
     // -----------------------------
-    public Stock addStock(Stock stock) {
-        return stockRepository.save(stock);
+    public Stock addorUpdateStock(Stock newStock) {
+
+        Stock existingStock = stockRepository.findBySymbol(newStock.getSymbol())
+                .orElse(null);
+
+        // If stock already exists → recalculate average buy price
+        if (existingStock != null) {
+
+            int oldQty = existingStock.getQuantity();
+            int newQty = newStock.getQuantity();
+            int totalQty = oldQty + newQty;
+
+            BigDecimal oldPrice = existingStock.getBuyPrice(); // BigDecimal
+            BigDecimal newPrice = newStock.getBuyPrice();       // BigDecimal
+
+            // (oldQty × oldPrice) + (newQty × newPrice)
+            BigDecimal totalCost =
+                    oldPrice.multiply(BigDecimal.valueOf(oldQty))
+                            .add(newPrice.multiply(BigDecimal.valueOf(newQty)));
+
+            // avgPrice = totalCost / totalQty
+            BigDecimal avgPrice =
+                    totalCost.divide(
+                            BigDecimal.valueOf(totalQty),
+                            2,                // scale (2 decimal places)
+                            RoundingMode.HALF_UP
+                    );
+
+            existingStock.setQuantity(totalQty);
+            existingStock.setBuyPrice(avgPrice);
+
+            return stockRepository.save(existingStock);
+        }
+
+        // First-time buy
+        return stockRepository.save(newStock);
     }
 
     // -----------------------------
