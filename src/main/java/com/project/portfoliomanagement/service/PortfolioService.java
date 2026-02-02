@@ -1,16 +1,18 @@
 package com.project.portfoliomanagement.service;
 
+import com.project.portfoliomanagement.entity.PortfolioSnapshot;
 import com.project.portfoliomanagement.entity.Stock;
 import com.project.portfoliomanagement.exception.ResourceNotFoundException;
+import com.project.portfoliomanagement.repository.PortfolioSnapshotRepository;
 import com.project.portfoliomanagement.repository.StockRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,24 +30,30 @@ public class PortfolioService {
     // cache for demo stability
     private Map<String, Object> cachedResponse;
 
+    private final StockRepository stockRepository;
+    private final PortfolioSnapshotRepository snapshotRepository;
+
+    public PortfolioService(StockRepository stockRepository,
+                            PortfolioSnapshotRepository snapshotRepository) {
+        this.stockRepository = stockRepository;
+        this.snapshotRepository = snapshotRepository;
+    }
+
+    // -----------------------------
+    // Market data (Top gainers / losers)
+    // -----------------------------
     public Map<String, Object> getMarketData() {
 
         if (cachedResponse != null) {
             return cachedResponse;
         }
 
-        String url = "https://www.alphavantage.co/query"+"?function=TOP_GAINERS_LOSERS"
+        String url = "https://www.alphavantage.co/query"
+                + "?function=TOP_GAINERS_LOSERS"
                 + "&apikey=" + apiKey;
 
         cachedResponse = restTemplate.getForObject(url, Map.class);
         return cachedResponse;
-    }
-
-    private final StockRepository stockRepository;
-
-
-    public PortfolioService(StockRepository stockRepository) {
-        this.stockRepository = stockRepository;
     }
 
     // -----------------------------
@@ -55,7 +63,6 @@ public class PortfolioService {
         return stockRepository.findAll();
     }
 
-
     // -----------------------------
     // Add stock OR update existing stock with avg price recalculation
     // -----------------------------
@@ -64,26 +71,23 @@ public class PortfolioService {
         Stock existingStock = stockRepository.findBySymbol(newStock.getSymbol())
                 .orElse(null);
 
-        // If stock already exists → recalculate average buy price
         if (existingStock != null) {
 
             int oldQty = existingStock.getQuantity();
             int newQty = newStock.getQuantity();
             int totalQty = oldQty + newQty;
 
-            BigDecimal oldPrice = existingStock.getBuyPrice(); // BigDecimal
-            BigDecimal newPrice = newStock.getBuyPrice();       // BigDecimal
+            BigDecimal oldPrice = existingStock.getBuyPrice();
+            BigDecimal newPrice = newStock.getBuyPrice();
 
-            // (oldQty × oldPrice) + (newQty × newPrice)
             BigDecimal totalCost =
                     oldPrice.multiply(BigDecimal.valueOf(oldQty))
                             .add(newPrice.multiply(BigDecimal.valueOf(newQty)));
 
-            // avgPrice = totalCost / totalQty
             BigDecimal avgPrice =
                     totalCost.divide(
                             BigDecimal.valueOf(totalQty),
-                            2,                // scale (2 decimal places)
+                            2,
                             RoundingMode.HALF_UP
                     );
 
@@ -93,7 +97,6 @@ public class PortfolioService {
             return stockRepository.save(existingStock);
         }
 
-        // First-time buy
         return stockRepository.save(newStock);
     }
 
@@ -127,10 +130,8 @@ public class PortfolioService {
             throw new IllegalArgumentException("Not enough stock to sell");
         }
 
-        // Decrease quantity
         stock.setQuantity(stock.getQuantity() - sellQuantity);
 
-        // If quantity becomes 0, delete the stock
         if (stock.getQuantity() == 0) {
             stockRepository.delete(stock);
         } else {
@@ -139,7 +140,7 @@ public class PortfolioService {
     }
 
     // -----------------------------
-    // Remove stock from portfolio (only if quantity is 0)
+    // Remove stock
     // -----------------------------
     public void removeStock(Long stockId) {
         if (!stockRepository.existsById(stockId)) {
@@ -150,12 +151,60 @@ public class PortfolioService {
         stockRepository.deleteById(stockId);
     }
 
-
-    //Search stock by symbol
+    // -----------------------------
+    // Search stock by symbol
+    // -----------------------------
     public Stock getStockBySymbol(String symbol) {
         return stockRepository.findBySymbol(symbol)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Stock not found with symbol: " + symbol
                 ));
+    }
+
+    // ======================================================
+    // ✅ NEW FEATURE: DAILY PORTFOLIO SNAPSHOT & ALERT LOGIC
+    // ======================================================
+    public Map<String, Object> generateDailyPortfolioSummary() {
+
+        List<Stock> stocks = stockRepository.findAll();
+
+        double totalValue = stocks.stream()
+                .mapToDouble(stock ->
+                        stock.getBuyPrice().doubleValue() * stock.getQuantity()
+                )
+                .sum();
+
+        LocalDate today = LocalDate.now();
+        LocalDate yesterday = today.minusDays(1);
+
+        double yesterdayValue = snapshotRepository
+                .findByDate(yesterday)
+                .map(PortfolioSnapshot::getTotalValue)
+                .orElse(0.0);
+
+        double profitOrLoss = totalValue - yesterdayValue;
+
+        PortfolioSnapshot snapshot = snapshotRepository
+                .findByDate(today)
+                .orElse(new PortfolioSnapshot());
+
+        snapshot.setDate(today);
+        snapshot.setTotalValue(totalValue);
+        snapshot.setProfitOrLoss(profitOrLoss);
+
+        snapshotRepository.save(snapshot);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("date", today);
+        response.put("totalValue", totalValue);
+        response.put("profitOrLoss", profitOrLoss);
+        response.put(
+                "message",
+                profitOrLoss >= 0
+                        ? "Your portfolio gained today 📈"
+                        : "Your portfolio incurred a loss today 📉"
+        );
+
+        return response;
     }
 }

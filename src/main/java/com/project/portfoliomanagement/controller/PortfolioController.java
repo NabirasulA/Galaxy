@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/portfolio")
@@ -69,31 +70,49 @@ public class PortfolioController {
         return ResponseEntity.noContent().build();
     }
 
-
-    //get stock by symbol
-     //--------------------------------
+    // --------------------------------
+    // Get stock by symbol
+    // --------------------------------
     @GetMapping("/stock/search")
     public ResponseEntity<Stock> getStockBySymbol(@RequestParam String symbol) {
-        if((symbol==null)||symbol.isBlank()||symbol.isEmpty()){
-            throw new RuntimeException("Symbol Must be provided");
+        if ((symbol == null) || symbol.isBlank()) {
+            throw new RuntimeException("Symbol must be provided");
         }
-        Stock stock = portfolioService.getStockBySymbol (symbol);
-        return ResponseEntity.ok(portfolioService.getStockBySymbol(symbol));
+        Stock stock = portfolioService.getStockBySymbol(symbol);
+        return ResponseEntity.ok(stock);
     }
 
-    //Get todays gainers in stock market
+    // --------------------------------
+    // Get today's top gainers
+    // --------------------------------
     @GetMapping("/stock/gainers")
     public Object getTodaysGainers() {
         return portfolioService.getMarketData().get("top_gainers");
     }
-    //get todays losers in stock market
+
+    // --------------------------------
+    // Get today's top losers
+    // --------------------------------
     @GetMapping("/stock/losers")
     public Object getTodaysLosers() {
         return portfolioService.getMarketData().get("top_losers");
     }
-    //get active stocks in stock market
+
+    // --------------------------------
+    // Get today's most active stocks
+    // --------------------------------
     @GetMapping("/stock/active")
     public Object getActiveStocks() {
         return portfolioService.getMarketData().get("most_active");
+    }
+
+    // =====================================================
+    // ✅ NEW API: Daily Portfolio Summary (Popup Alert)
+    // =====================================================
+    @GetMapping("/daily-summary")
+    public ResponseEntity<Map<String, Object>> getDailyPortfolioSummary() {
+        return ResponseEntity.ok(
+                portfolioService.generateDailyPortfolioSummary()
+        );
     }
 }
