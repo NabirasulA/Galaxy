@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/portfolio")
@@ -95,5 +96,22 @@ public class PortfolioController {
     @GetMapping("/stock/active")
     public Object getActiveStocks() {
         return portfolioService.getMarketData().get("most_active");
+    }
+
+
+
+    @GetMapping("/stock/ipos")
+    public Map<String, Object> getIPOs(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String type,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "1") int limit) {
+
+        return PortfolioService.getIPOs(status, type, page, limit);
+    }
+
+    @GetMapping("/stock/ipos/{identifier}")
+    public Map<String, Object> getIPO(@PathVariable String identifier) {
+        return PortfolioService.getIPODetails(identifier);
     }
 }
