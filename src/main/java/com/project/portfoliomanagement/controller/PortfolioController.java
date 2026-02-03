@@ -114,6 +114,7 @@ public class PortfolioController {
         return ResponseEntity.ok(
                 portfolioService.generateDailyPortfolioSummary()
         );
+    }
 
 
     @GetMapping("/stock/ipos")
