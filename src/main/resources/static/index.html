@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Portfolio Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body {
+            margin: 0;
+            background: linear-gradient(120deg,#0f2027,#203a43,#2c5364);
+            color: #fff;
+        }
+
+        header {
+            padding: 18px;
+            text-align: center;
+            font-size: 26px;
+            font-weight: 700;
+            background: rgba(0,0,0,0.35);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        /* BUTTONS */
+        button {
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            background: #00eaff;
+            font-weight: 600;
+        }
+
+        button.sell {
+            background: #ffc107;
+            color: #000;
+        }
+
+        /* TABLE */
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            background: rgba(255,255,255,0.08);
+            border-radius: 12px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+        }
+
+        th { background: rgba(0,0,0,0.5); }
+
+        /* CHART */
+        .chart-wrapper {
+            display: flex;
+            justify-content: center;
+            margin: 25px 0;
+        }
+        .chart-box {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* MODAL */
+        .modal-bg {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(6px);
+        }
+
+        .modal {
+            background: #0f172a;
+            max-width: 420px;
+            margin: 10% auto;
+            padding: 28px;
+            border-radius: 18px;
+            box-shadow: 0 0 40px rgba(0,234,255,0.35);
+        }
+
+        .modal h2 {
+            margin-top: 0;
+            text-align: center;
+        }
+
+        /* INPUTS */
+        .input-group {
+            margin-bottom: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            outline: none;
+        }
+
+        input[readonly] {
+            background: #020617;
+            color: #38bdf8;
+        }
+
+        /* SEARCH */
+        .search-box { position: relative; }
+
+        .search-results {
+            position: absolute;
+            width: 100%;
+            background: #020617;
+            border-radius: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 10;
+        }
+
+        .search-results div {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #1e293b;
+        }
+
+        .search-results div:hover {
+            background: #1e293b;
+        }
+
+        /* TOAST */
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #00eaff;
+            color: #000;
+            padding: 14px 22px;
+            border-radius: 10px;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>📊 Portfolio Management Dashboard</header>
+
+<div class="container">
+    <button onclick="openAddStockModal()">➕ Add Stock</button>
+
+    <div class="chart-wrapper">
+        <div class="chart-box">
+            <canvas id="portfolioChart"></canvas>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Symbol</th>
+            <th>Company</th>
+            <th>Qty</th>
+            <th>Total Buy Value</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody id="portfolioTable"></tbody>
+    </table>
+</div>
+
+<!-- ADD STOCK MODAL -->
+<div id="addStockModal" class="modal-bg">
+    <div class="modal">
+        <h2>Add Stock</h2>
+
+        <div class="input-group search-box">
+            <input id="searchInput"
+                   placeholder="Search symbol or company"
+                   oninput="debouncedSearch()"
+                   autocomplete="off">
+            <div id="searchResults" class="search-results"></div>
+        </div>
+
+        <div class="input-group">
+            <input id="symbol" placeholder="Symbol" readonly>
+        </div>
+
+        <div class="input-group">
+            <input id="companyName" placeholder="Company Name" readonly>
+        </div>
+
+        <div class="input-group">
+            <input id="quantity" type="number" min="1" placeholder="Quantity"
+                   oninput="updateTotalPrice()">
+        </div>
+
+        <div class="input-group">
+            <input id="buyPrice" placeholder="Total Buy Value" readonly>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:18px">
+            <button onclick="closeAddStockModal()">Cancel</button>
+            <button onclick="addStock()">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- SELL MODAL -->
+<div id="sellModal" class="modal-bg">
+    <div class="modal">
+        <h2>Sell Stock</h2>
+        <p id="sellInfo"></p>
+        <input id="sellQuantity" type="number" placeholder="Quantity to sell">
+        <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:18px">
+            <button onclick="closeSellModal()">Cancel</button>
+            <button class="sell" onclick="confirmSell()">Sell</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+    const BASE_URL = "http://localhost:8080/portfolio";
+    const ALPHA_KEY = "OQCOPC0OERKXY6Z5";
+
+    let chart, debounceTimer, sellStockId;
+    let pricePerShare = 0;
+
+    /* UI */
+    function toast(msg){
+        toastDiv.innerText = msg;
+        toastDiv.style.display = "block";
+        setTimeout(()=>toastDiv.style.display="none",2500);
+    }
+
+    function openAddStockModal(){ addStockModal.style.display="block"; }
+    function closeAddStockModal(){ addStockModal.style.display="none"; }
+    function closeSellModal(){ sellModal.style.display="none"; }
+
+    /* SEARCH */
+    function debouncedSearch(){
+        clearTimeout(debounceTimer);
+        debounceTimer=setTimeout(searchStocks,700);
+    }
+
+    async function searchStocks(){
+        const q=searchInput.value.trim();
+        if(q.length<2) return;
+
+        const res=await fetch(
+            `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${q}&apikey=${ALPHA_KEY}`
+        );
+        const data=await res.json();
+
+        searchResults.innerHTML="";
+        (data.bestMatches||[]).slice(0,6).forEach(m=>{
+            const s=m["1. symbol"];
+            const n=m["2. name"];
+            searchResults.innerHTML+=
+                `<div onclick="selectStock('${s}','${n.replace(/'/g,"")}')">
+                <strong>${s}</strong> – ${n}
+            </div>`;
+        });
+    }
+
+    /* PRICE */
+    async function selectStock(sym,name){
+        symbol.value=sym;
+        companyName.value=name;
+        searchResults.innerHTML="";
+        quantity.value=1;
+
+        const res=await fetch(
+            `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${sym}&apikey=${ALPHA_KEY}`
+        );
+        const d=await res.json();
+        pricePerShare=parseFloat(d["Global Quote"]?.["05. price"]||0);
+        updateTotalPrice();
+    }
+
+    function updateTotalPrice(){
+        const qty=parseInt(quantity.value||0);
+        buyPrice.value=qty>0 ? `₹ ${(pricePerShare*qty).toFixed(2)}` : "";
+    }
+
+    /* BACKEND */
+    async function addStock(){
+        closeAddStockModal();
+        await fetch(`${BASE_URL}/stock`,{
+            method:"POST",
+            headers:{ "Content-Type":"application/json" },
+            body:JSON.stringify({
+                symbol:symbol.value,
+                companyName:companyName.value,
+                quantity:quantity.value,
+                buyPrice:(pricePerShare*quantity.value).toFixed(2)
+            })
+        });
+        toast("Stock added 🚀");
+        loadPortfolio();
+    }
+
+    function openSellModal(id,sym,qty){
+        sellStockId=id;
+        sellInfo.innerText=`${sym} | Available: ${qty}`;
+        sellModal.style.display="block";
+    }
+
+    async function confirmSell(){
+        closeSellModal();
+        await fetch(`${BASE_URL}/stock/${sellStockId}/sell?quantity=${sellQuantity.value}`,{
+            method:"PUT"
+        });
+        toast("Stock sold 📉");
+        loadPortfolio();
+    }
+
+    /* LOAD */
+    async function loadPortfolio(){
+        const res=await fetch(BASE_URL);
+        const data=await res.json();
+        portfolioTable.innerHTML="";
+
+        const labels=[], values=[];
+
+        data.forEach(s=>{
+            labels.push(s.symbol);
+            values.push(s.buyPrice*s.quantity);
+            portfolioTable.innerHTML+=`
+            <tr>
+                <td>${s.symbol}</td>
+                <td>${s.companyName||"-"}</td>
+                <td>${s.quantity}</td>
+                <td>₹ ${(s.buyPrice*s.quantity).toFixed(2)}</td>
+                <td>
+                    <button class="sell"
+                        onclick="openSellModal(${s.id},'${s.symbol}',${s.quantity})">
+                        Sell
+                    </button>
+                </td>
+            </tr>`;
+        });
+
+        if(chart) chart.destroy();
+        chart=new Chart(portfolioChart,{
+            type:"doughnut",
+            data:{ labels, datasets:[{ data:values }] },
+            options:{ maintainAspectRatio:false }
+        });
+    }
+
+    loadPortfolio();
+</script>
+
+</body>
+</html>
