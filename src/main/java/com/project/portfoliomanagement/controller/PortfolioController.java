@@ -114,5 +114,20 @@ public class PortfolioController {
         return ResponseEntity.ok(
                 portfolioService.generateDailyPortfolioSummary()
         );
+
+
+    @GetMapping("/stock/ipos")
+    public Map<String, Object> getIPOs(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String type,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "1") int limit) {
+
+        return PortfolioService.getIPOs(status, type, page, limit);
+    }
+
+    @GetMapping("/stock/ipos/{identifier}")
+    public Map<String, Object> getIPO(@PathVariable String identifier) {
+        return PortfolioService.getIPODetails(identifier);
     }
 }

@@ -6,6 +6,10 @@ import com.project.portfoliomanagement.exception.ResourceNotFoundException;
 import com.project.portfoliomanagement.repository.PortfolioSnapshotRepository;
 import com.project.portfoliomanagement.repository.StockRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -25,7 +29,7 @@ public class PortfolioService {
     @Value("${alphavantage.base.url}")
     private String baseUrl;
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private static final RestTemplate restTemplate = new RestTemplate();
 
     // cache for demo stability
     private Map<String, Object> cachedResponse;
@@ -99,6 +103,50 @@ public class PortfolioService {
 
         return stockRepository.save(newStock);
     }
+
+
+
+
+    @Value("${ipoalerts.api.key}")
+    private static String ipoApiKey;
+
+
+    private static HttpHeaders createIPOHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("x-api-key", ipoApiKey);
+        return headers;
+    }
+
+    public static Map<String, Object> getIPOs(String status, String type, int page, int limit) {
+
+        String url = "https://api.ipoalerts.in/ipos?page=" + page + "&limit=" + limit;
+
+        if (status != null)
+            url += "&status=" + status;
+
+        if (type != null)
+            url += "&type=" + type;
+
+        HttpEntity<String> entity = new HttpEntity<>(createIPOHeaders());
+
+        ResponseEntity<Map> response =
+                restTemplate.exchange(url, HttpMethod.GET, entity, Map.class);
+
+        return response.getBody();
+    }
+
+    public static Map<String, Object> getIPODetails(String identifier) {
+
+        String url = "https://api.ipoalerts.in/ipos/" + identifier;
+
+        HttpEntity<String> entity = new HttpEntity<>(createIPOHeaders());
+
+        ResponseEntity<Map> response =
+                restTemplate.exchange(url, HttpMethod.GET, entity, Map.class);
+
+        return response.getBody();
+    }
+
 
     // -----------------------------
     // Update stock quantity
