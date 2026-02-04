@@ -11,7 +11,6 @@ public class PortfolioSnapshot {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 🔴 FIX IS HERE (name = "snapshot_date")
     @Column(name = "snapshot_date", nullable = false, unique = true)
     private LocalDate date;
 

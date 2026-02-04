@@ -7,6 +7,28 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!--    <script>-->
+<!--        /* ================= CACHE HELPERS ================= */-->
+<!--        function setCache(key, data, ttlMs) {-->
+<!--            const record = {-->
+<!--                data,-->
+<!--                expiry: Date.now() + ttlMs-->
+<!--            };-->
+<!--            localStorage.setItem(key, JSON.stringify(record));-->
+<!--        }-->
+
+<!--        function getCache(key) {-->
+<!--            const record = localStorage.getItem(key);-->
+<!--            if (!record) return null;-->
+
+<!--            const parsed = JSON.parse(record);-->
+<!--            if (Date.now() > parsed.expiry) {-->
+<!--                localStorage.removeItem(key);-->
+<!--                return null;-->
+<!--            }-->
+<!--            return parsed.data;-->
+<!--        }-->
+<!--    </script>-->
 
     <style>
         * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
@@ -137,6 +159,21 @@
             background: #1e293b;
         }
 
+        /* CARDS */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+            gap: 16px;
+            margin: 25px 0;
+        }
+        .card {
+            background: rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 16px;
+        }
+        .card h3 { margin-top:0; font-size:18px; }
+
+
         /* TOAST */
         #toast {
             position: fixed;
@@ -153,7 +190,7 @@
 
 <body>
 
-<header>📊 Portfolio Management Dashboard</header>
+<header>Galaxy</header>
 
 <div class="container">
     <button onclick="openAddStockModal()">➕ Add Stock</button>
@@ -162,6 +199,27 @@
         <div class="chart-box">
             <canvas id="portfolioChart"></canvas>
         </div>
+    </div>
+
+
+
+    <!-- MARKET SNAPSHOT -->
+    <div class="grid">
+        <div class="card"><h3>📈 Top Gainers</h3><div id="gainers">Loading...</div></div>
+        <div class="card"><h3>📉 Top Losers</h3><div id="losers">Loading...</div></div>
+        <div class="card"><h3>🔥 Most Active</h3><div id="active">Loading...</div></div>
+    </div>
+
+    <!-- IPO -->
+    <div class="card">
+        <h3>🚀 Upcoming IPOs</h3>
+        <div id="ipos">Loading...</div>
+    </div>
+
+    <!-- NEWS -->
+    <div class="card">
+        <h3>📰 Market News</h3>
+        <div id="news">Loading...</div>
     </div>
 
     <table>
@@ -233,6 +291,7 @@
 <script>
     const BASE_URL = "http://localhost:8080/portfolio";
     const ALPHA_KEY = "OQCOPC0OERKXY6Z5";
+    const IPO_ALERTS_KEY = "768e0b79502ba98201d4a2ffb31a3f6c5eee4d26a98075b084dae585a37802a0";
 
     let chart, debounceTimer, sellStockId;
     let pricePerShare = 0;
@@ -360,8 +419,82 @@
         });
     }
 
+    /* ================= MARKET DATA ================= */
+    async function loadMarket(){
+        try {
+            const g = await fetch(`${BASE_URL}/stock/gainers`).then(r=>r.json());
+            const l = await fetch(`${BASE_URL}/stock/losers`).then(r=>r.json());
+            const a = await fetch(`${BASE_URL}/stock/active`).then(r=>r.json());
+
+            gainers.innerHTML = (g && g.length)
+                ? g.slice(0,5).map(x=>`${x.ticker} ↑ ${x.change_percentage}`).join("<br>")
+                : "No strong gainers today";
+
+            losers.innerHTML = (l && l.length)
+                ? l.slice(0,5).map(x=>`${x.ticker} ↓ ${x.change_percentage}`).join("<br>")
+                : "No strong losers today";
+
+            active.innerHTML = (a && a.length)
+                ? a.slice(0,5).map(x=>`${x.ticker} (${x.volume})`).join("<br>")
+                : "Low market activity";
+        } catch {
+            gainers.innerHTML = losers.innerHTML = active.innerHTML = "Unable to load data";
+        }
+    }
+
+    /* ================= IPO ALERTS ================= */
+    async function loadIPOs(){
+        try {
+            const res = await fetch(
+                "https://api.ipoalerts.in/ipos?status=upcoming",
+                { headers: { "x-api-key": IPO_ALERTS_KEY } }
+            );
+            const data = await res.json();
+
+            ipos.innerHTML = (data.data && data.data.length)
+                ? data.data.slice(0,5)
+                    .map(i => `<b>${i.company_name}</b> – ${i.open_date}`)
+                    .join("<br>")
+                : "No upcoming IPOs found";
+        } catch {
+            ipos.innerHTML = "IPO data unavailable";
+        }
+    }
+
+    /* ================= NEWS ================= */
+    async function loadNews() {
+        try {
+            const res = await fetch(
+                `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&apikey=${ALPHA_KEY}`
+            );
+
+            if (!res.ok) throw new Error("News API failed");
+
+            const d = await res.json();
+
+            news.innerHTML = Array.isArray(d.feed) && d.feed.length
+                ? d.feed.slice(0, 5)
+                    .map(n => `
+                    <b>${n.title}</b><br>
+                    <small>${n.source}</small>
+                    <hr>
+                `)
+                    .join("")
+                : "No market news available";
+
+        } catch (err) {
+            console.error("News load error:", err);
+            news.innerHTML = "Unable to load market news";
+        }
+    }
+
+    /* ================= INIT ================= */
+    loadMarket();
+    loadIPOs();
+    loadNews();
     loadPortfolio();
 </script>
 
 </body>
 </html>
+
