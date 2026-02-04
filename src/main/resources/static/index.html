@@ -185,6 +185,125 @@
             border-radius: 10px;
             display: none;
         }
+
+        /* IPO TABS */
+        .ipo-header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .ipo-tabs {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .ipo-refresh-btn {
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(0,234,255,0.3);
+            border-radius: 8px;
+            color: #00eaff;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .ipo-refresh-btn:hover {
+            background: rgba(0,234,255,0.2);
+            border-color: #00eaff;
+        }
+        .cache-indicator {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 5px;
+        }
+        .ipo-tab {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 2px solid rgba(0,234,255,0.3);
+            background: rgba(0,0,0,0.3);
+            color: #00eaff;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .ipo-tab:hover {
+            background: rgba(0,234,255,0.1);
+            border-color: #00eaff;
+        }
+        .ipo-tab.active {
+            background: #00eaff;
+            color: #000;
+            border-color: #00eaff;
+        }
+
+        /* IPO CARDS */
+        .ipo-container {
+            display: grid;
+            gap: 16px;
+        }
+        .ipo-card {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 18px;
+            border-left: 4px solid #00eaff;
+        }
+        .ipo-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .ipo-logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+        .ipo-name {
+            flex: 1;
+        }
+        .ipo-name h4 {
+            margin: 0;
+            font-size: 18px;
+            color: #00eaff;
+        }
+        .ipo-name span {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+        .ipo-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .ipo-detail {
+            background: rgba(255,255,255,0.05);
+            padding: 8px;
+            border-radius: 6px;
+        }
+        .ipo-detail-label {
+            font-size: 11px;
+            color: #94a3b8;
+            text-transform: uppercase;
+        }
+        .ipo-detail-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            margin-top: 4px;
+        }
+        .ipo-about {
+            font-size: 13px;
+            line-height: 1.6;
+            color: #cbd5e1;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
     </style>
 </head>
 
@@ -212,10 +331,20 @@
 
     <!-- IPO -->
     <div class="card">
-        <h3>🚀 Upcoming IPOs</h3>
-        <div id="ipos">Loading...</div>
+        <h3>🚀 IPOs</h3>
+        <div class="ipo-header-section">
+            <div class="ipo-tabs">
+                <div class="ipo-tab active" onclick="loadIPOsByStatus('upcoming')">Upcoming</div>
+                <div class="ipo-tab" onclick="loadIPOsByStatus('open')">Open</div>
+                <div class="ipo-tab" onclick="loadIPOsByStatus('closed')">Closed</div>
+                <div class="ipo-tab" onclick="loadIPOsByStatus('announced')">Announced</div>
+            </div>
+            <button class="ipo-refresh-btn" onclick="refreshIPOs()">🔄 Refresh</button>
+        </div>
+        <div class="cache-indicator" id="cacheIndicator"></div>
+        <div id="ipos" class="ipo-container">Loading...</div>
     </div>
-
+<br>
     <!-- NEWS -->
     <div class="card">
         <h3>📰 Market News</h3>
@@ -442,23 +571,175 @@
         }
     }
 
-    /* ================= IPO ALERTS ================= */
-    async function loadIPOs(){
+    /* ================= IPO ALERTS WITH CACHE ================= */
+    let currentIPOStatus = 'upcoming';
+    const IPO_CACHE_TTL = 60 * 60 * 1000; // 1 hour in milliseconds
+
+    // Cache helper functions
+    function getIPOCache(status) {
         try {
-            const res = await fetch(
-                "https://api.ipoalerts.in/ipos?status=upcoming",
-                { headers: { "x-api-key": IPO_ALERTS_KEY } }
-            );
+            const cacheKey = `ipo_${status}`;
+            const cached = localStorage.getItem(cacheKey);
+            if (!cached) return null;
+
+            const { data, timestamp } = JSON.parse(cached);
+            const now = Date.now();
+
+            // Check if cache is still valid
+            if (now - timestamp < IPO_CACHE_TTL) {
+                console.log(`Using cached IPO data for status: ${status}`);
+                return data;
+            } else {
+                // Cache expired, remove it
+                localStorage.removeItem(cacheKey);
+                return null;
+            }
+        } catch (err) {
+            console.error('Cache read error:', err);
+            return null;
+        }
+    }
+
+    function setIPOCache(status, data) {
+        try {
+            const cacheKey = `ipo_${status}`;
+            const cacheData = {
+                data: data,
+                timestamp: Date.now()
+            };
+            localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+            console.log(`Cached IPO data for status: ${status}`);
+        } catch (err) {
+            console.error('Cache write error:', err);
+        }
+    }
+
+    function renderIPOCards(data, status, fromCache = false) {
+        if (data.ipos && data.ipos.length) {
+            ipos.innerHTML = data.ipos.map(ipo => `
+                <div class="ipo-card">
+                    <div class="ipo-header">
+                        <img src="${ipo.logo || ''}" alt="${ipo.name}" class="ipo-logo"
+                             onerror="this.style.display='none'">
+                        <div class="ipo-name">
+                            <h4>${ipo.name}</h4>
+                            <span>${ipo.symbol} • ${ipo.type || 'IPO'}</span>
+                        </div>
+                    </div>
+
+                    <div class="ipo-details">
+                        <div class="ipo-detail">
+                            <div class="ipo-detail-label">Issue Size</div>
+                            <div class="ipo-detail-value">${ipo.issueSize || 'N/A'}</div>
+                        </div>
+                        <div class="ipo-detail">
+                            <div class="ipo-detail-label">Price Range</div>
+                            <div class="ipo-detail-value">₹${ipo.priceRange || 'N/A'}</div>
+                        </div>
+                        <div class="ipo-detail">
+                            <div class="ipo-detail-label">Min Amount</div>
+                            <div class="ipo-detail-value">₹${ipo.minAmount?.toLocaleString('en-IN') || 'N/A'}</div>
+                        </div>
+                        <div class="ipo-detail">
+                            <div class="ipo-detail-label">Issue Date</div>
+                            <div class="ipo-detail-value">${formatDate(ipo.startDate)} - ${formatDate(ipo.endDate)}</div>
+                        </div>
+                        <div class="ipo-detail">
+                            <div class="ipo-detail-label">Listing Date</div>
+                            <div class="ipo-detail-value">${formatDate(ipo.listingDate)}</div>
+                        </div>
+                    </div>
+
+                    ${ipo.about ? `
+                        <div class="ipo-about">
+                            <strong>About:</strong> ${truncateText(ipo.about, 300)}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        } else {
+            ipos.innerHTML = `No ${status} IPOs found`;
+        }
+
+        // Update cache indicator
+        const cacheIndicator = document.getElementById('cacheIndicator');
+        if (fromCache) {
+            cacheIndicator.innerHTML = '📦 Loaded from cache (updates every hour)';
+        } else {
+            cacheIndicator.innerHTML = '✨ Fresh data loaded';
+        }
+    }
+
+    async function loadIPOsByStatus(status, forceRefresh = false) {
+        currentIPOStatus = status;
+
+        // Update active tab
+        document.querySelectorAll('.ipo-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        event.target.classList.add('active');
+
+        // Check cache first (unless force refresh)
+        if (!forceRefresh) {
+            const cachedData = getIPOCache(status);
+            if (cachedData) {
+                renderIPOCards(cachedData, status, true);
+                return;
+            }
+        }
+
+        // Show loading if no cache or force refresh
+        ipos.innerHTML = 'Loading...';
+        const cacheIndicator = document.getElementById('cacheIndicator');
+        cacheIndicator.innerHTML = '';
+
+        try {
+            const res = await fetch(`${BASE_URL}/stock/ipos?status=${status}`);
             const data = await res.json();
 
-            ipos.innerHTML = (data.data && data.data.length)
-                ? data.data.slice(0,5)
-                    .map(i => `<b>${i.company_name}</b> – ${i.open_date}`)
-                    .join("<br>")
-                : "No upcoming IPOs found";
-        } catch {
-            ipos.innerHTML = "IPO data unavailable";
+            // Save to cache
+            setIPOCache(status, data);
+
+            // Render the data
+            renderIPOCards(data, status, false);
+        } catch (err) {
+            console.error("IPO load error:", err);
+            ipos.innerHTML = "Unable to load IPO data";
+            cacheIndicator.innerHTML = '';
         }
+    }
+
+    // Refresh function to force reload
+    async function refreshIPOs() {
+        const activeTab = document.querySelector('.ipo-tab.active');
+        if (activeTab) {
+            // Clear cache for current status
+            const cacheKey = `ipo_${currentIPOStatus}`;
+            localStorage.removeItem(cacheKey);
+
+            // Reload with force refresh
+            await loadIPOsByStatus(currentIPOStatus, true);
+            toast('IPO data refreshed!');
+        }
+    }
+
+    // Initial load with 'upcoming' status
+    async function loadIPOs(){
+        await loadIPOsByStatus('upcoming');
+    }
+
+    /* Helper function to format dates */
+    function formatDate(dateStr) {
+        if (!dateStr) return 'N/A';
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    /* Helper function to truncate text */
+    function truncateText(text, maxLength) {
+        if (!text) return '';
+        if (text.length <= maxLength) return text;
+        return text.substring(0, maxLength) + '...';
     }
 
     /* ================= NEWS ================= */
