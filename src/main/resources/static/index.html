@@ -1397,6 +1397,14 @@
             <div class="stat-label">Total Return:</div>
             <div class="stat-value positive" id="totalReturn">+0.0%</div>
         </div>
+        <div class="stat-item">
+            <div class="stat-label">Unrealized P/L:</div>
+            <div class="stat-value" id="unrealizedPL">$0.00</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label">Realized P/L:</div>
+            <div class="stat-value" id="realizedPL">$0.00</div>
+        </div>
         <div class="header-actions">
             <button class="btn-primary" onclick="openAddStockModal()">+ Add Asset</button>
             <button class="btn-secondary" onclick="removeAllAssets()">Remove Asset</button>
@@ -1575,8 +1583,36 @@
     const FINNHUB_KEY = "d61fl21r01quq5pg3t00d61fl21r01quq5pg3t0g"; // Free Finnhub API key
     const IPO_ALERTS_KEY = "768e0b79502ba98201d4a2ffb31a3f6c5eee4d26a98075b084dae585a37802a0";
 
-    let allocationChart, performanceChart, debounceTimer, sellStockId;
+    let allocationChart, performanceChart, debounceTimer, sellStockId, sellStockSymbol, sellStockBuyPrice;
     let pricePerShare = 0;
+
+    /* ================= REALIZED & UNREALIZED P/L TRACKING ================= */
+    // Store realized profits in localStorage (persists across sessions)
+    function getRealizedProfits() {
+        const stored = localStorage.getItem('realizedProfits');
+        return stored ? JSON.parse(stored) : {};
+    }
+
+    function saveRealizedProfit(symbol, profit) {
+        const profits = getRealizedProfits();
+        profits[symbol] = (profits[symbol] || 0) + profit;
+        localStorage.setItem('realizedProfits', JSON.stringify(profits));
+    }
+
+    function getTotalRealizedProfit() {
+        const profits = getRealizedProfits();
+        return Object.values(profits).reduce((sum, val) => sum + val, 0);
+    }
+
+    function calculateUnrealizedPL(stock, currentPrice) {
+        // Unrealized P/L = (Current Price - Avg Buy Price) × Quantity
+        return (currentPrice - stock.buyPrice) * stock.quantity;
+    }
+
+    function calculateRealizedPL(stock, sellPrice, soldQuantity) {
+        // Realized P/L = (Sell Price - Avg Buy Price) × Quantity Sold
+        return (sellPrice - stock.buyPrice) * soldQuantity;
+    }
 
     /* NAVIGATION */
     function showSection(section) {
@@ -1806,18 +1842,46 @@
         }
     }
 
-    function openSellModal(id,sym,qty){
-        sellStockId=id;
-        sellInfo.innerText=`${sym} | Available: ${qty}`;
-        sellModal.style.display="block";
+    function openSellModal(id, sym, qty) {
+        sellStockId = id;
+        sellStockSymbol = sym;
+
+        // Fetch the stock's buy price from portfolio
+        fetch(BASE_URL)
+            .then(res => res.json())
+            .then(data => {
+                const stock = data.find(s => s.id === id);
+                if (stock) {
+                    sellStockBuyPrice = stock.buyPrice;
+                }
+            });
+
+        sellInfo.innerText = `${sym} | Available: ${qty}`;
+        sellModal.style.display = "block";
     }
 
-    async function confirmSell(){
+    async function confirmSell() {
+        const soldQuantity = parseInt(sellQuantity.value);
+
+        // Fetch current price to calculate realized profit
+        const currentPrice = await fetchCurrentPrice(sellStockSymbol);
+        const sellPrice = currentPrice || sellStockBuyPrice; // Fallback to buy price if API fails
+
+        // Calculate and save realized profit
+        const realizedProfit = calculateRealizedPL(
+            { buyPrice: sellStockBuyPrice },
+            sellPrice,
+            soldQuantity
+        );
+        saveRealizedProfit(sellStockSymbol, realizedProfit);
+
         closeSellModal();
-        await fetch(`${BASE_URL}/stock/${sellStockId}/sell?quantity=${sellQuantity.value}`,{
-            method:"PUT"
+
+        await fetch(`${BASE_URL}/stock/${sellStockId}/sell?quantity=${soldQuantity}`, {
+            method: "PUT"
         });
-        toast("Stock sold 📉");
+
+        toast(`Stock sold 📉 | Realized P/L: ${realizedProfit >= 0 ? '+' : ''}$${Math.abs(realizedProfit).toFixed(2)}`);
         loadPortfolio();
     }
 
@@ -1857,6 +1921,7 @@
             const labels = [], values = [];
             let totalValue = 0;
             let totalCost = 0;
+            let totalUnrealizedPL = 0; // Track unrealized P/L
 
             if (data && data.length > 0) {
                 // Fetch real-time prices for all stocks
@@ -1878,6 +1943,10 @@
 
                     totalValue += marketValue;
                     totalCost += costBasis;
+
+                    // Calculate unrealized P/L for this stock
+                    const unrealizedPL = calculateUnrealizedPL(stock, currentPrice);
+                    totalUnrealizedPL += unrealizedPL;
 
                     labels.push(stock.symbol);
                     values.push(marketValue);
@@ -1919,6 +1988,15 @@
                 document.getElementById('totalReturn').textContent = `${totalReturn >= 0 ? '+' : ''}${totalReturnPercent}%`;
                 document.getElementById('totalReturn').className = `stat-value ${totalReturn >= 0 ? 'positive' : 'negative'}`;
 
+                // ✅ Update Unrealized P/L (calculated from current holdings with live prices)
+                document.getElementById('unrealizedPL').textContent = `${totalUnrealizedPL >= 0 ? '+' : ''}$${Math.abs(totalUnrealizedPL).toFixed(2)}`;
+                document.getElementById('unrealizedPL').className = `stat-value ${totalUnrealizedPL >= 0 ? 'positive' : 'negative'}`;
+
+                // ✅ Update Realized P/L (retrieved from localStorage)
+                const totalRealizedPL = getTotalRealizedProfit();
+                document.getElementById('realizedPL').textContent = `${totalRealizedPL >= 0 ? '+' : ''}$${Math.abs(totalRealizedPL).toFixed(2)}`;
+                document.getElementById('realizedPL').className = `stat-value ${totalRealizedPL >= 0 ? 'positive' : 'negative'}`;
+
                 // Update last updated timestamp
                 const now = new Date();
                 const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
@@ -1927,6 +2005,15 @@
             } else {
                 tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#94a3b8;">No holdings yet. Add your first stock!</td></tr>';
                 document.getElementById('lastUpdated').innerHTML = '⚪ No holdings';
+
+                // Reset unrealized P/L to $0.00 when no holdings
+                document.getElementById('unrealizedPL').textContent = '$0.00';
+                document.getElementById('unrealizedPL').className = 'stat-value';
+
+                // Keep realized P/L even when no holdings (it persists)
+                const totalRealizedPL = getTotalRealizedProfit();
+                document.getElementById('realizedPL').textContent = `${totalRealizedPL >= 0 ? '+' : ''}$${Math.abs(totalRealizedPL).toFixed(2)}`;
+                document.getElementById('realizedPL').className = `stat-value ${totalRealizedPL >= 0 ? 'positive' : 'negative'}`;
             }
 
             // Update allocation chart
