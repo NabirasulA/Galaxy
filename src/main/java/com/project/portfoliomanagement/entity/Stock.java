@@ -28,6 +28,9 @@ public class Stock {
     @Column(name = "buy_price", precision = 10, scale = 2)
     private BigDecimal buyPrice;
 
+    @Column(name = "total_invested_amount", precision = 15, scale = 2)
+    private BigDecimal totalInvestedAmount;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -55,6 +58,7 @@ public class Stock {
         this.companyName = companyName;
         this.quantity = quantity;
         this.buyPrice = buyPrice;
+        this.totalInvestedAmount = buyPrice.multiply(BigDecimal.valueOf(quantity));
     }
 
     // ---- Getters and Setters ----
@@ -92,6 +96,14 @@ public class Stock {
 
     public void setBuyPrice(BigDecimal buyPrice) {
         this.buyPrice = buyPrice;
+    }
+
+    public BigDecimal getTotalInvestedAmount() {
+        return totalInvestedAmount;
+    }
+
+    public void setTotalInvestedAmount(BigDecimal totalInvestedAmount) {
+        this.totalInvestedAmount = totalInvestedAmount;
     }
 
     public LocalDateTime getCreatedAt() {
