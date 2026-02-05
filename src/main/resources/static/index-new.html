@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Galaxy - Portfolio Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://js.puter.com/v2/"></script>
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/ai-chat.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+
+<body>
+
+<!-- ================= HEADER ================= -->
+<header>
+    <div class="header-title">GALAXY</div>
+    <div class="header-stats">
+        <div class="stat-item">
+            <div class="stat-label">Total Portfolio Value:</div>
+            <div class="stat-value positive" id="totalValue">$0.00</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label">Total Return:</div>
+            <div class="stat-value positive" id="totalReturn">+0.0%</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label">Unrealized P/L:</div>
+            <div class="stat-value" id="unrealizedPL">$0.00</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label">Realized P/L:</div>
+            <div class="stat-value" id="realizedPL">$0.00</div>
+        </div>
+        <div class="header-actions">
+            <button class="btn-primary" onclick="openAddStockModal()">+ Add Asset</button>
+            <button class="btn-secondary" onclick="removeAllAssets()">Remove Asset</button>
+        </div>
+    </div>
+</header>
+
+<!-- ================= MAIN LAYOUT ================= -->
+<div class="main-layout">
+    <main class="main-content" style="margin-left: 0; width: 100%;">
+
+        <!-- DASHBOARD SECTION -->
+        <div id="dashboardSection">
+
+            <!-- TOP ROW: CHARTS -->
+            <div class="dashboard-grid grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Asset Allocation</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="allocationChart"></canvas>
+                    </div>
+                    <div class="chart-legend" id="allocationLegend"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Portfolio Performance</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HOLDINGS TABLE -->
+            <div class="card scroll-section" id="holdingsSection">
+                <div class="card-header">
+                    <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                        <div>
+                            <h3 class="card-title" style="margin-bottom:4px;">Your Holdings</h3>
+                            <div id="lastUpdated" style="font-size:11px; color:#94a3b8;">
+                                🟢 Live prices • Last updated: Loading...
+                            </div>
+                        </div>
+                        <button onclick="refreshPortfolio()" class="btn-secondary" style="padding:8px 16px; font-size:13px;">
+                            🔄 Refresh Prices
+                        </button>
+                    </div>
+                </div>
+                <table class="holdings-table">
+                    <thead>
+                    <tr>
+                        <th>Symbol</th>
+                        <th>Company Name</th>
+                        <th>Shares</th>
+                        <th>Current Price</th>
+                        <th>Cost Basis</th>
+                        <th>Market Value</th>
+                        <th>P/L</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody id="holdingsTableBody"></tbody>
+                </table>
+            </div>
+
+            <br>
+
+            <!-- IPO SECTION -->
+            <div class="card scroll-section" id="ipoSection">
+                <div class="card-header">
+                    <h3 class="card-title">🚀 IPOs</h3>
+                </div>
+                <div class="ipo-header-section">
+                    <div class="ipo-tabs">
+                        <div class="ipo-tab active" onclick="loadIPOsByStatus('upcoming')">Upcoming</div>
+                        <div class="ipo-tab" onclick="loadIPOsByStatus('open')">Open</div>
+                        <div class="ipo-tab" onclick="loadIPOsByStatus('closed')">Closed</div>
+                        <div class="ipo-tab" onclick="loadIPOsByStatus('announced')">Announced</div>
+                    </div>
+                    <button class="ipo-refresh-btn" onclick="refreshIPOs()">🔄 Refresh</button>
+                </div>
+                <div class="cache-indicator" id="cacheIndicator"></div>
+                <div id="ipos" class="ipo-container">Loading...</div>
+            </div>
+
+            <br>
+
+            <!-- MARKET SNAPSHOT -->
+            <div class="dashboard-grid grid-2 scroll-section" id="marketSection">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">📈 Top Gainers</h3>
+                    </div>
+                    <div id="gainers">Loading...</div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">📉 Top Losers</h3>
+                    </div>
+                    <div id="losers">Loading...</div>
+                </div>
+            </div>
+
+            <!-- MARKET NEWS -->
+            <div class="card scroll-section" id="newsSection">
+                <div class="card-header">
+                    <h3 class="card-title">📰 Market News</h3>
+                </div>
+                <div id="news">Loading...</div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- ================= ADD STOCK MODAL ================= -->
+<div id="addStockModal" class="modal-bg" onclick="if(event.target === this) closeAddStockModal()">
+    <div class="modal">
+        <h2>Add Stock</h2>
+
+        <div class="input-group search-box">
+            <label class="input-label">Search Stock</label>
+            <input id="searchInput"
+                   placeholder="Search symbol or company"
+                   oninput="debouncedSearch()"
+                   autocomplete="off">
+            <div id="searchResults" class="search-results"></div>
+        </div>
+
+        <div class="input-group">
+            <label class="input-label">Symbol</label>
+            <input id="symbol" placeholder="Symbol" readonly>
+        </div>
+
+        <div class="input-group">
+            <label class="input-label">Company Name</label>
+            <input id="companyName" placeholder="Company Name" readonly>
+        </div>
+
+        <div class="input-group">
+            <label class="input-label">Quantity</label>
+            <input id="quantity" type="number" min="1" placeholder="Quantity"
+                   oninput="updateTotalPrice()">
+        </div>
+
+        <div class="input-group">
+            <label class="input-label">Total Buy Value</label>
+            <input id="buyPrice" placeholder="Total Buy Value" readonly>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px">
+            <button class="btn-secondary" onclick="closeAddStockModal()">Cancel</button>
+            <button class="btn-primary" onclick="addStock()">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- ================= SELL MODAL ================= -->
+<div id="sellModal" class="modal-bg" onclick="if(event.target === this) closeSellModal()">
+    <div class="modal">
+        <h2>Sell Stock</h2>
+        <p id="sellInfo" style="margin-bottom: 16px; color: #64748b;"></p>
+        <div class="input-group">
+            <label class="input-label">Quantity to Sell</label>
+            <input id="sellQuantity" type="number" placeholder="Quantity to sell">
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px">
+            <button class="btn-secondary" onclick="closeSellModal()">Cancel</button>
+            <button class="btn-danger" onclick="confirmSell()">Sell</button>
+        </div>
+    </div>
+</div>
+
+<!-- ================= TOAST ================= -->
+<div id="toast"></div>
+
+<!-- ================= SCROLLSPY NAVIGATION ================= -->
+<nav class="scrollspy-nav" id="scrollspyNav">
+    <a href="#holdingsSection" class="scrollspy-item active" data-section="holdingsSection">
+        <span class="scrollspy-label">Holdings</span>
+    </a>
+    <a href="#ipoSection" class="scrollspy-item" data-section="ipoSection">
+        <span class="scrollspy-label">IPOs</span>
+
+    </a>
+    <a href="#marketSection" class="scrollspy-item" data-section="marketSection">
+        <span class="scrollspy-label">Market</span>
+
+    </a>
+    <a href="#newsSection" class="scrollspy-item" data-section="newsSection">
+        <span class="scrollspy-label">News</span>
+
+    </a>
+</nav>
+
+<!-- ================= AI CHAT WIDGET ================= -->
+<button class="ai-chat-toggle" onclick="toggleAIChat()" title="Chat with Galaxy AI (Ctrl+K)">
+    🤖
+</button>
+
+<div id="aiChatContainer" class="ai-chat-container">
+    <div class="ai-chat-header">
+        <h3>🤖 Galaxy AI <span style="font-size:11px; opacity:0.8; font-weight:normal;">powered by Grok</span></h3>
+        <div style="display:flex; gap:8px;">
+            <button class="close-btn" onclick="clearAIChatHistory()" title="Clear chat">🗑️</button>
+            <button class="close-btn" onclick="toggleAIChat()" title="Close">×</button>
+        </div>
+    </div>
+
+    <div class="ai-chat-messages" id="aiChatMessages">
+        <div class="ai-message assistant">
+            👋 Hi! I'm <strong>Galaxy AI</strong>, your intelligent portfolio assistant powered by <strong>Grok</strong>. I can help you with:
+            <br><br>
+            📊 Portfolio analysis & insights<br>
+            📈 Stock recommendations<br>
+            💡 Investment advice<br>
+            🎓 Financial education
+            <br><br>
+            How can I help you today?
+        </div>
+    </div>
+
+    <div class="ai-quick-actions">
+        <button class="ai-quick-btn" onclick="sendQuickMessage('Analyze my portfolio')">📊 Analyze Portfolio</button>
+        <button class="ai-quick-btn" onclick="sendQuickMessage('What stocks should I buy?')">💰 Stock Tips</button>
+        <button class="ai-quick-btn" onclick="sendQuickMessage('Explain diversification')">🎓 Learn</button>
+    </div>
+
+    <div class="ai-chat-input">
+        <input type="text" id="aiChatInput" placeholder="Ask me anything..."
+               onkeypress="if(event.key === 'Enter') sendAIMessage()">
+        <button onclick="sendAIMessage()" id="aiSendBtn">➤</button>
+    </div>
+</div>
+
+<!-- ================= JAVASCRIPT FILES ================= -->
+<script src="js/app.js"></script>
+<script src="js/portfolio.js"></script>
+<script src="js/market.js"></script>
+<script src="js/ipo.js"></script>
+<script src="js/ai-chat.js"></script>
+<script src="js/scrollspy.js"></script>
+
+<!-- ================= INITIALIZATION ================= -->
+<script>
+    // Initialize application
+    document.addEventListener('DOMContentLoaded', function() {
+        loadMarket();
+        loadIPOs();
+        loadNews();
+        loadPortfolio();
+        startAutoRefresh();
+    });
+</script>
+
+</body>
+</html>

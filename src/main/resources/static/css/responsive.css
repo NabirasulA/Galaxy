@@ -1,0 +1,820 @@
+/* ===============================================
+   GALAXY - RESPONSIVE STYLES
+   =============================================== */
+
+/* ================= Large Screens (1200px and above) ================= */
+@media (max-width: 1200px) {
+    header {
+        padding: 16px 32px;
+    }
+    .main-content {
+        padding: 24px;
+    }
+}
+
+/* ================= Tablets and Medium Screens (1024px to 1199px) ================= */
+@media (max-width: 1024px) {
+    header {
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 16px 24px;
+    }
+
+    .header-title {
+        flex: 1 1 100%;
+        font-size: 22px;
+    }
+
+    .header-stats {
+        flex: 0 1 auto;
+        gap: 20px;
+    }
+
+    .stat-value {
+        font-size: 18px;
+    }
+
+    .stat-label {
+        font-size: 12px;
+    }
+
+    .sidebar {
+        width: 200px;
+        padding: 16px 0;
+    }
+
+    .nav-item {
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+
+    .main-content {
+        padding: 20px;
+    }
+
+    .card {
+        padding: 20px;
+    }
+
+    .grid-2 {
+        grid-template-columns: 1fr;
+    }
+
+    .grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dashboard-grid {
+        gap: 20px;
+    }
+
+    .chart-container {
+        height: 280px;
+    }
+
+    .holdings-table th,
+    .holdings-table td {
+        padding: 12px;
+        font-size: 13px;
+    }
+}
+
+/* ================= Tablets (768px to 1023px) ================= */
+@media (max-width: 1023px) {
+    header {
+        padding: 12px 16px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .header-title {
+        font-size: 20px;
+        width: 100%;
+        margin-bottom: 8px;
+    }
+
+    .header-stats {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .stat-item {
+        text-align: left;
+        flex: 1;
+        min-width: 150px;
+    }
+
+    .stat-label {
+        font-size: 11px;
+        margin-bottom: 2px;
+    }
+
+    .stat-value {
+        font-size: 16px;
+    }
+
+    .header-actions {
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .header-actions button {
+        flex: 1;
+        min-width: 120px;
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    .main-layout {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        padding: 0;
+        box-shadow: none;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .nav-item {
+        padding: 12px 14px;
+        white-space: nowrap;
+        flex-shrink: 0;
+        font-size: 13px;
+        min-width: fit-content;
+    }
+
+    .nav-item.active {
+        border-right: none;
+        border-bottom: 3px solid #2563eb;
+        padding-bottom: 10px;
+    }
+
+    .main-content {
+        padding: 16px;
+    }
+
+    .card {
+        padding: 16px;
+        border-radius: 10px;
+    }
+
+    .card-title {
+        font-size: 16px;
+    }
+
+    .dashboard-grid {
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+
+    .grid-2 {
+        grid-template-columns: 1fr;
+    }
+
+    .grid-4 {
+        grid-template-columns: 1fr;
+    }
+
+    .chart-container {
+        height: 250px;
+    }
+
+    .holdings-table {
+        font-size: 12px;
+    }
+
+    .holdings-table th,
+    .holdings-table td {
+        padding: 10px;
+    }
+
+    button {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger {
+        min-width: 100px;
+    }
+
+    .modal {
+        margin: 15% auto;
+        padding: 20px;
+        max-width: 85%;
+    }
+
+    .modal h2 {
+        font-size: 20px;
+    }
+
+    .input-label {
+        font-size: 13px;
+    }
+
+    input {
+        padding: 10px;
+        font-size: 13px;
+    }
+
+    .ipo-details {
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 10px;
+    }
+
+    .ipo-detail {
+        padding: 8px;
+    }
+
+    .ipo-detail-label {
+        font-size: 10px;
+    }
+
+    .ipo-detail-value {
+        font-size: 13px;
+    }
+
+    .market-item {
+        padding: 10px 0;
+    }
+}
+
+/* ================= Small Tablets and Large Phones (481px to 767px) ================= */
+@media (max-width: 767px) {
+    header {
+        padding: 10px 12px;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .header-title {
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
+
+    .header-stats {
+        width: 100%;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .stat-item {
+        text-align: left;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .stat-item:last-child {
+        border-bottom: none;
+    }
+
+    .stat-label {
+        font-size: 11px;
+        margin-bottom: 0;
+        flex: 1;
+    }
+
+    .stat-value {
+        font-size: 14px;
+        text-align: right;
+    }
+
+    .header-actions {
+        width: 100%;
+        flex-direction: column;
+        gap: 6px;
+        margin-top: 8px;
+    }
+
+    .header-actions button {
+        width: 100%;
+        padding: 10px 8px;
+        font-size: 12px;
+    }
+
+    .sidebar {
+        width: 100%;
+        padding: 8px 0;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .nav-item {
+        padding: 10px 12px;
+        white-space: nowrap;
+        flex-shrink: 0;
+        font-size: 12px;
+        min-width: fit-content;
+        border-bottom: 3px solid transparent;
+    }
+
+    .nav-item.active {
+        border-right: none;
+        border-bottom: 3px solid #2563eb;
+        background: transparent;
+    }
+
+    .nav-icon {
+        width: 18px;
+        height: 18px;
+        font-size: 14px;
+    }
+
+    .main-content {
+        padding: 12px;
+        overflow-x: hidden;
+    }
+
+    .card {
+        padding: 14px;
+        border-radius: 8px;
+        margin-bottom: 12px;
+    }
+
+    .card-header {
+        margin-bottom: 14px;
+    }
+
+    .card-title {
+        font-size: 15px;
+    }
+
+    .dashboard-grid {
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .grid-2,
+    .grid-4 {
+        grid-template-columns: 1fr;
+    }
+
+    .chart-container {
+        height: 220px;
+        margin-bottom: 12px;
+    }
+
+    .holdings-table {
+        font-size: 11px;
+        margin-top: 10px;
+    }
+
+    .holdings-table th,
+    .holdings-table td {
+        padding: 8px 6px;
+    }
+
+    .holdings-table th {
+        font-size: 10px;
+        padding: 8px 4px;
+    }
+
+    button {
+        padding: 8px 12px;
+        font-size: 12px;
+        border-radius: 6px;
+    }
+
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger {
+        min-width: 80px;
+        padding: 8px 10px;
+    }
+
+    .modal {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        margin: 0;
+        padding: 18px;
+        max-width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        border-radius: 12px;
+    }
+
+    .modal h2 {
+        font-size: 18px;
+        margin-bottom: 16px;
+    }
+
+    .input-group {
+        margin-bottom: 14px;
+    }
+
+    .input-label {
+        font-size: 12px;
+        margin-bottom: 6px;
+    }
+
+    input {
+        padding: 10px;
+        font-size: 14px;
+        border-radius: 6px;
+    }
+
+    .modal-bg {
+        display: none;
+    }
+
+    .modal-bg.show {
+        display: block;
+    }
+
+    .value-card-amount {
+        font-size: 20px;
+    }
+
+    .search-results {
+        max-height: 150px;
+        border-radius: 6px;
+    }
+
+    .search-results div {
+        padding: 10px;
+        font-size: 12px;
+    }
+
+    .market-item {
+        padding: 10px 0;
+        margin-bottom: 8px;
+    }
+
+    .market-ticker {
+        font-size: 13px;
+    }
+
+    .ipo-card {
+        padding: 12px;
+    }
+
+    .ipo-header {
+        gap: 10px;
+    }
+
+    .ipo-logo {
+        width: 40px;
+        height: 40px;
+    }
+
+    .ipo-name h4 {
+        font-size: 14px;
+    }
+
+    .ipo-details {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 8px;
+    }
+
+    .ipo-detail {
+        padding: 6px;
+    }
+
+    .ipo-detail-label {
+        font-size: 9px;
+    }
+
+    .ipo-detail-value {
+        font-size: 12px;
+    }
+
+    .ipo-about {
+        font-size: 12px;
+    }
+
+    .ipo-tabs {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .ipo-tab {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+}
+
+/* ================= Mobile Phones (max 480px) ================= */
+@media (max-width: 480px) {
+    * {
+        font-size: 14px;
+    }
+
+    header {
+        padding: 8px 10px;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .header-title {
+        font-size: 16px;
+        margin-bottom: 4px;
+    }
+
+    .header-stats {
+        width: 100%;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .stat-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .stat-label {
+        font-size: 10px;
+        margin-bottom: 0;
+    }
+
+    .stat-value {
+        font-size: 12px;
+        text-align: right;
+    }
+
+    .header-actions {
+        width: 100%;
+        flex-direction: column;
+        gap: 4px;
+        margin-top: 6px;
+    }
+
+    .header-actions button {
+        width: 100%;
+        padding: 8px 6px;
+        font-size: 11px;
+    }
+
+    .sidebar {
+        padding: 6px 0;
+        gap: 2px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+    }
+
+    .nav-item {
+        padding: 8px 10px;
+        font-size: 11px;
+        min-width: fit-content;
+    }
+
+    .nav-icon {
+        width: 16px;
+        height: 16px;
+        font-size: 12px;
+    }
+
+    .main-content {
+        padding: 8px;
+    }
+
+    .card {
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 8px;
+    }
+
+    .card-header {
+        margin-bottom: 10px;
+        gap: 6px;
+    }
+
+    .card-title {
+        font-size: 13px;
+    }
+
+    .dashboard-grid {
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+
+    .grid-2,
+    .grid-4 {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .chart-container {
+        height: 200px;
+        margin-bottom: 8px;
+    }
+
+    .chart-legend {
+        gap: 8px;
+        margin-top: 8px;
+        font-size: 11px;
+    }
+
+    .holdings-table {
+        font-size: 10px;
+        margin-top: 8px;
+        width: 100%;
+        overflow-x: auto;
+        display: block;
+    }
+
+    .holdings-table thead {
+        display: none;
+    }
+
+    .holdings-table tr {
+        display: block;
+        margin-bottom: 8px;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 8px;
+        background: #f8fafc;
+    }
+
+    .holdings-table td {
+        display: block;
+        padding: 4px 0;
+        border: none;
+        text-align: left;
+    }
+
+    .holdings-table td:before {
+        content: attr(data-label);
+        font-weight: 600;
+        display: block;
+        font-size: 10px;
+        color: #64748b;
+        margin-bottom: 2px;
+    }
+
+    button {
+        padding: 6px 8px;
+        font-size: 11px;
+        border-radius: 4px;
+    }
+
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger {
+        padding: 6px 8px;
+        font-size: 10px;
+    }
+
+    .modal {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        margin: 0;
+        padding: 12px;
+        max-width: 95%;
+        max-height: 85vh;
+        overflow-y: auto;
+        border-radius: 10px;
+    }
+
+    .modal h2 {
+        font-size: 16px;
+        margin-bottom: 12px;
+    }
+
+    .input-group {
+        margin-bottom: 10px;
+    }
+
+    .input-label {
+        font-size: 11px;
+        margin-bottom: 4px;
+    }
+
+    input {
+        padding: 8px;
+        font-size: 13px;
+        border-radius: 4px;
+    }
+
+    input:focus {
+        box-shadow: 0 0 0 2px rgba(37,99,235,0.1);
+    }
+
+    .value-card {
+        text-align: center;
+    }
+
+    .value-card-label {
+        font-size: 10px;
+        margin-bottom: 4px;
+    }
+
+    .value-card-amount {
+        font-size: 16px;
+    }
+
+    .search-results {
+        max-height: 120px;
+        border-radius: 4px;
+    }
+
+    .search-results div {
+        padding: 8px;
+        font-size: 11px;
+    }
+
+    #toast {
+        bottom: 10px;
+        right: 10px;
+        padding: 10px 12px;
+        font-size: 11px;
+        border-radius: 6px;
+    }
+
+    .market-item {
+        padding: 8px 0;
+        margin-bottom: 6px;
+    }
+
+    .market-ticker {
+        font-size: 12px;
+        margin-bottom: 4px;
+    }
+
+    .ipo-card {
+        padding: 10px;
+        border-left: 3px solid #2563eb;
+    }
+
+    .ipo-header {
+        gap: 8px;
+    }
+
+    .ipo-logo {
+        width: 35px;
+        height: 35px;
+    }
+
+    .ipo-name h4 {
+        font-size: 12px;
+    }
+
+    .ipo-name span {
+        font-size: 10px;
+    }
+
+    .ipo-details {
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        gap: 6px;
+    }
+
+    .ipo-detail {
+        padding: 4px;
+    }
+
+    .ipo-detail-label {
+        font-size: 8px;
+    }
+
+    .ipo-detail-value {
+        font-size: 11px;
+    }
+
+    .ipo-about {
+        font-size: 11px;
+        margin-top: 8px;
+        padding-top: 8px;
+    }
+
+    .ipo-header-section {
+        flex-direction: column;
+    }
+
+    .ipo-tabs {
+        width: 100%;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 4px;
+    }
+
+    .ipo-tab {
+        padding: 6px 10px;
+        font-size: 11px;
+        flex-shrink: 0;
+    }
+
+    .ipo-refresh-btn {
+        width: 100%;
+        margin-top: 6px;
+    }
+}
