@@ -68,9 +68,8 @@ public class PortfolioService {
         return stockRepository.findAll();
     }
 
-    // -----------------------------
+
     // Add stock OR update existing stock with avg price recalculation
-    // -----------------------------
     public Stock addorUpdateStock(Stock newStock) {
 
         Stock existingStock = stockRepository.findBySymbol(newStock.getSymbol())

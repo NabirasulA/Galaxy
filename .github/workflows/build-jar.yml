@@ -2,7 +2,7 @@ name: Springboot Jar
 
 on:
   push:
-    branches: ["main"]
+    branches: ["feature/springboot-jar"]
   pull_request:
     branches: ["main"]
 jobs:

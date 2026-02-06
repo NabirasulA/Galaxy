@@ -34,7 +34,6 @@ public class GrokAIService {
         Guidelines:
         - Be concise but informative
         - Use bullet points for clarity when listing multiple items
-        - Include relevant emojis to make responses engaging (📈 📉 💰 🎯 ⚠️ 💡)
         - Always remind users that this is not personalized financial advice and they should consult a professional
         - If you don't know something, say so honestly
         - When analyzing portfolios, consider diversification, risk, and potential returns
