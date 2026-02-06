@@ -22,7 +22,27 @@
 
 <!-- ================= HEADER ================= -->
 <header>
-    <div class="header-title">GALAXY</div>
+    <div class="header-left">
+        <div class="header-title">GALAXY</div>
+        <nav class="header-nav" id="headerNav">
+            <a href="#holdingsSection" class="header-nav-item active" data-section="holdingsSection">
+                <span class="nav-icon">📊</span>
+                <span class="nav-text">Holdings</span>
+            </a>
+            <a href="#ipoSection" class="header-nav-item" data-section="ipoSection">
+                <span class="nav-icon">🚀</span>
+                <span class="nav-text">IPOs</span>
+            </a>
+            <a href="#marketSection" class="header-nav-item" data-section="marketSection">
+                <span class="nav-icon">📈</span>
+                <span class="nav-text">Market</span>
+            </a>
+            <a href="#newsSection" class="header-nav-item" data-section="newsSection">
+                <span class="nav-icon">📰</span>
+                <span class="nav-text">News</span>
+            </a>
+        </nav>
+    </div>
     <div class="header-stats">
         <div class="stat-item">
             <div class="stat-label">Total Portfolio Value:</div>
@@ -218,24 +238,6 @@
 <!-- ================= TOAST ================= -->
 <div id="toast"></div>
 
-<!-- ================= SCROLLSPY NAVIGATION ================= -->
-<nav class="scrollspy-nav" id="scrollspyNav">
-    <a href="#holdingsSection" class="scrollspy-item active" data-section="holdingsSection">
-        <span class="scrollspy-label">Holdings</span>
-    </a>
-    <a href="#ipoSection" class="scrollspy-item" data-section="ipoSection">
-        <span class="scrollspy-label">IPOs</span>
-
-    </a>
-    <a href="#marketSection" class="scrollspy-item" data-section="marketSection">
-        <span class="scrollspy-label">Market</span>
-
-    </a>
-    <a href="#newsSection" class="scrollspy-item" data-section="newsSection">
-        <span class="scrollspy-label">News</span>
-
-    </a>
-</nav>
 
 <!-- ================= AI CHAT WIDGET ================= -->
 <button class="ai-chat-toggle" onclick="toggleAIChat()" title="Chat with Galaxy AI (Ctrl+K)">

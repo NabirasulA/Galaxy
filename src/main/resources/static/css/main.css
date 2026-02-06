@@ -24,12 +24,59 @@ header {
     justify-content: space-between;
     align-items: center;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 30px;
 }
 
 .header-title {
     font-size: 24px;
     font-weight: 700;
     color: #1e293b;
+}
+
+.header-nav {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.header-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    background: transparent;
+}
+
+.header-nav-item:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+.header-nav-item.active {
+    background: #2563eb;
+    color: #fff;
+}
+
+.header-nav-item .nav-icon {
+    font-size: 14px;
+}
+
+.header-nav-item .nav-text {
+    font-weight: 600;
 }
 
 .header-stats {
@@ -555,124 +602,9 @@ input[readonly] {
     border-top: 1px solid #e2e8f0;
 }
 
-/* ================= SCROLLSPY NAVIGATION ================= */
+/* ================= SCROLLSPY NAVIGATION - Hidden, using header nav instead ================= */
 .scrollspy-nav {
-    position: fixed;
-    top: 50%;
-    right: 20px;
-    transform: translateY(-50%);
-    z-index: 900;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.scrollspy-item {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 10px;
-    cursor: pointer;
-    padding: 8px 12px;
-    border-radius: 25px;
-    background: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-    text-decoration: none;
-    color: #64748b;
-}
-
-.scrollspy-item:hover {
-    background: #fff;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-    transform: translateX(-5px);
-}
-
-.scrollspy-item.active {
-    background: #2563eb;
-    color: #fff;
-    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
-}
-
-.scrollspy-icon {
-    font-size: 18px;
-    width: 24px;
-    text-align: center;
-}
-
-.scrollspy-label {
-    font-size: 12px;
-    font-weight: 600;
-    white-space: nowrap;
-    max-width: 0;
-    overflow: hidden;
-    opacity: 0;
-    transition: all 0.3s ease;
-}
-
-.scrollspy-item:hover .scrollspy-label,
-.scrollspy-item.active .scrollspy-label {
-    max-width: 150px;
-    opacity: 1;
-    margin-right: 4px;
-}
-
-.scrollspy-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: currentColor;
-    flex-shrink: 0;
-}
-
-/* Scrollspy responsive */
-@media (max-width: 1200px) {
-    .scrollspy-nav {
-        right: 10px;
-    }
-    .scrollspy-item {
-        padding: 6px 10px;
-    }
-    .scrollspy-icon {
-        font-size: 16px;
-    }
-}
-
-@media (max-width: 768px) {
-    .scrollspy-nav {
-        top: auto;
-        bottom: 100px;
-        right: 10px;
-        transform: none;
-    }
-    .scrollspy-item {
-        padding: 8px;
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        justify-content: center;
-    }
-    .scrollspy-label {
-        display: none;
-    }
-    .scrollspy-dot {
-        display: none;
-    }
-}
-
-@media (max-width: 480px) {
-    .scrollspy-nav {
-        bottom: 90px;
-        right: 8px;
-    }
-    .scrollspy-item {
-        width: 36px;
-        height: 36px;
-        padding: 6px;
-    }
-    .scrollspy-icon {
-        font-size: 14px;
-    }
+    display: none;
 }
 
 /* Section scroll margin for fixed header */

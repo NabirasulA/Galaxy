@@ -5,7 +5,7 @@
 // ================= SCROLLSPY INITIALIZATION =================
 function initScrollspy() {
     const sections = document.querySelectorAll('.scroll-section');
-    const navItems = document.querySelectorAll('.scrollspy-item');
+    const navItems = document.querySelectorAll('.header-nav-item');
 
     if (sections.length === 0 || navItems.length === 0) return;
 
@@ -44,7 +44,7 @@ function initScrollspy() {
 
 // ================= UPDATE ACTIVE NAV ITEM =================
 function updateActiveNav(activeId) {
-    const navItems = document.querySelectorAll('.scrollspy-item');
+    const navItems = document.querySelectorAll('.header-nav-item');
     navItems.forEach(item => {
         const sectionId = item.getAttribute('data-section');
         if (sectionId === activeId) {
@@ -58,7 +58,7 @@ function updateActiveNav(activeId) {
 // ================= UPDATE SCROLLSPY ON SCROLL =================
 function updateScrollspy() {
     const sections = document.querySelectorAll('.scroll-section');
-    const navItems = document.querySelectorAll('.scrollspy-item');
+    const navItems = document.querySelectorAll('.header-nav-item');
 
     if (sections.length === 0) return;
 
