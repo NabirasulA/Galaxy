@@ -44,9 +44,9 @@ public class PortfolioService {
         this.snapshotRepository = snapshotRepository;
     }
 
-    // -----------------------------
+
     // Market data (Top gainers / losers)
-    // -----------------------------
+
     public Map<String, Object> getMarketData() {
 
         if (cachedResponse != null) {
@@ -61,9 +61,9 @@ public class PortfolioService {
         return cachedResponse;
     }
 
-    // -----------------------------
+
     // Get all stocks in portfolio
-    // -----------------------------
+
     public List<Stock> getPortfolio() {
         return stockRepository.findAll();
     }
@@ -148,9 +148,9 @@ public class PortfolioService {
     }
 
 
-    // -----------------------------
+
     // Update stock quantity
-    // -----------------------------
+
     public Stock updateStockQuantity(Long stockId, Integer quantity) {
         Stock stock = stockRepository.findById(stockId)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -161,9 +161,9 @@ public class PortfolioService {
         return stockRepository.save(stock);
     }
 
-    // -----------------------------
+
     // Sell stock (reduce quantity or delete if quantity becomes 0)
-    // -----------------------------
+
     public void sellStock(Long stockId, Integer sellQuantity) {
         Stock stock = stockRepository.findById(stockId)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -187,9 +187,9 @@ public class PortfolioService {
         }
     }
 
-    // -----------------------------
+
     // Remove stock
-    // -----------------------------
+
     public void removeStock(Long stockId) {
         if (!stockRepository.existsById(stockId)) {
             throw new ResourceNotFoundException(
@@ -199,9 +199,9 @@ public class PortfolioService {
         stockRepository.deleteById(stockId);
     }
 
-    // -----------------------------
+
     // Search stock by symbol
-    // -----------------------------
+
     public Stock getStockBySymbol(String symbol) {
         return stockRepository.findBySymbol(symbol)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -209,9 +209,9 @@ public class PortfolioService {
                 ));
     }
 
-    // ======================================================
-    // ✅ NEW FEATURE: DAILY PORTFOLIO SNAPSHOT & ALERT LOGIC
-    // ======================================================
+
+    //  DAILY PORTFOLIO SNAPSHOT & ALERT LOGIC
+
     public Map<String, Object> generateDailyPortfolioSummary() {
 
         List<Stock> stocks = stockRepository.findAll();

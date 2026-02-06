@@ -47,9 +47,7 @@ public class GrokAIService {
         this.stockRepository = stockRepository;
     }
 
-    /**
-     * Send a chat message to Grok AI
-     */
+
     public ChatResponseDTO chat(ChatRequestDTO request) {
         try {
             String apiKey = grokConfig.getApiKey();
@@ -126,9 +124,6 @@ public class GrokAIService {
         return chat(request);
     }
 
-    /**
-     * Get AI recommendation for a specific stock
-     */
     public ChatResponseDTO getStockAnalysis(String symbol) {
         ChatRequestDTO request = new ChatRequestDTO();
         request.setMessage("Please provide a brief analysis of " + symbol + " stock including:\n" +
@@ -141,18 +136,14 @@ public class GrokAIService {
         return chat(request);
     }
 
-    /**
-     * Get investment advice based on user's question
-     */
+
     public ChatResponseDTO getInvestmentAdvice(String question) {
         ChatRequestDTO request = new ChatRequestDTO();
         request.setMessage(question);
         return chat(request);
     }
 
-    /**
-     * Build portfolio context string for AI
-     */
+
     private String buildPortfolioContext() {
         try {
             List<Stock> stocks = stockRepository.findAll();

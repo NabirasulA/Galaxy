@@ -12,6 +12,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/portfolio")
+@CrossOrigin(origins = {"http://localhost:5500", "http://127.0.0.1:5500", "http://localhost:3000", "http://127.0.0.1:3000"})
 public class PortfolioController {
 
     private final PortfolioService portfolioService;
@@ -89,13 +90,14 @@ public class PortfolioController {
         return portfolioService.getMarketData().get("top_gainers");
     }
 
-    // --------------------------------
+
     // Get today's top losers
-    // --------------------------------
+
     @GetMapping("/stock/losers")
     public Object getTodaysLosers() {
         return portfolioService.getMarketData().get("top_losers");
     }
+
 
  
     // Get today's most active stocks
