@@ -29,9 +29,9 @@ public class PortfolioController {
         return ResponseEntity.ok(portfolioService.getPortfolio());
     }
 
-
+ 
     // Add or Update stock to portfolio
-
+ 
     @PostMapping("/stock")
     public ResponseEntity<Stock> addStock(@Valid @RequestBody Stock stock) {
         Stock saved = portfolioService.addorUpdateStock(stock);
@@ -60,7 +60,7 @@ public class PortfolioController {
     }
 
     // Sell stock (reduce quantity or delete if quantity becomes 0)
-
+    
     @PutMapping("/stock/{stockId}/sell")
     public ResponseEntity<Void> sellStock(
             @PathVariable Long stockId,
@@ -70,9 +70,9 @@ public class PortfolioController {
         return ResponseEntity.noContent().build();
     }
 
-
+    
     // Get stock by symbol
-
+    
     @GetMapping("/stock/search")
     public ResponseEntity<Stock> getStockBySymbol(@RequestParam String symbol) {
         if ((symbol == null) || symbol.isBlank()) {
@@ -82,7 +82,7 @@ public class PortfolioController {
         return ResponseEntity.ok(stock);
     }
 
-
+ 
     // Get today's top gainers
 
     @GetMapping("/stock/gainers")
@@ -99,6 +99,7 @@ public class PortfolioController {
     }
 
 
+ 
     // Get today's most active stocks
 
     @GetMapping("/stock/active")
@@ -106,9 +107,9 @@ public class PortfolioController {
         return portfolioService.getMarketData().get("most_active");
     }
 
-
+   
     // Daily Portfolio Summary (Popup Alert)
-
+    
     @GetMapping("/daily-summary")
     public ResponseEntity<Map<String, Object>> getDailyPortfolioSummary() {
         return ResponseEntity.ok(
